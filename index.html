@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Giphy</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+        crossorigin="anonymous">
+</head>
+
+<body>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <div class="container">
+        <div class="row">
+            <div class="col" id="bucket">
+
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div id="gifDump" class="col-10">
+
+            </div>
+            <div class="col-2">
+                <form>
+                    <div class="form-group">
+                        <label for="exampleInputPassword1">Add a Sea Creature</label>
+                        <input class="form-control" id="creatureInput" placeholder="Bloop bloop!">
+                    </div>
+                    <button id="submit" type="submit" class="btn btn-primary">Submit</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+       
+        var animals = ["shrimp", "otter", "fish", "clam", "sea turtle", "whale", "jellyfish", "penguin", "eel", "barnacle", "starfish", "shark", "stingray", "coral", "salmon", "iguana",]
+
+        for (var i = 0; i < animals.length; i++) {
+            
+            var buttons = $("<button>", { class: "btn btn-primary mr-1 mt-1 animalButton" }).text(animals[i]);
+            $("#bucket").append(buttons);
+            // console.log(buttons)
+
+        };
+
+
+        $("#submit").on("click", function (event) {
+            event.preventDefault();
+            // pulls input from form
+            var newCreature = $("#creatureInput").val().trim();
+            
+            // appends new button w creature name
+            var buttons = $("<button>", { class: "btn btn-primary mr-1 mt-1 animalButton" }).text(newCreature);
+            $("#bucket").append(buttons);
+
+        });
+        $("body").on("click", ".animalButton", function () {
+
+            var animal = $(this).text();
+            console.log(animal);
+
+            var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+                animal + "&api_key=dc6zaTOxFJmzC&limit=10";
+
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            })
+
+                .then(function (response) {
+                    var results = response.data;
+                    // console.log(results)
+                    for (var i = 0; i < results.length; i++) {
+                        var gifDiv = $("<div>");
+
+                        var rating = results[i].rating;
+
+                        var p = $("<p>").text("Rating: " + rating);
+
+                        var gif = $("<img>");
+                        gif.attr("src", results[i].images.fixed_height_still.url);
+                        gif.attr("class", "gif");
+                        gif.attr("data-state", "still");
+                        gif.attr("data-still", results[i].images.fixed_height_still.url);
+                        gif.attr("data-animate", results[i].images.fixed_height.url);
+
+
+                        gifDiv.prepend(p);
+                        gifDiv.prepend(gif);
+
+                        $("#gifDump").prepend(gifDiv);
+
+
+                    }
+
+                });
+
+        });
+
+        // $(".gif").on("click", function () {
+            $("body").on("click", ".gif", function(){
+            console.log("click");
+
+
+
+            var state = $(this).attr("data-state");
+            // If the clicked image's state is still, update its src attribute to what its data-animate value is.
+            // Then, set the image's data-state to animate
+            // Else set src to the data-still value
+            if (state === "still") {
+                $(this).attr("src", $(this).attr("data-animate"));
+                $(this).attr("data-state", "animate");
+            } else {
+                $(this).attr("src", $(this).attr("data-still"));
+                $(this).attr("data-state", "still");
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
